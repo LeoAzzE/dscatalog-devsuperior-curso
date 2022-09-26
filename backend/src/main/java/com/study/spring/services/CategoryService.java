@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityNotFoundException;
+
 import com.study.spring.dto.CategoryDTO;
 import com.study.spring.entities.Category;
 import com.study.spring.repositories.CategoryRepository;
-import com.study.spring.services.exceptions.EntityNotFoundException;
+import com.study.spring.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class CategoryService {
@@ -29,7 +31,7 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public Object findById(Long id) {
 		Optional<Category> obj = repository.findById(id);
-		Category entity = obj.orElseThrow(()-> new EntityNotFoundException("Entity Not Found"));
+		Category entity = obj.orElseThrow(()-> new ResourceNotFoundException("Entity Not Found"));
 		return new CategoryDTO(entity);
 	}
 	
@@ -39,5 +41,18 @@ public class CategoryService {
 		entity.setName(dto.getName());
 		entity = repository.save(entity);
 		return new CategoryDTO(entity);
+	}
+	
+	@Transactional
+	public CategoryDTO update(Long id, CategoryDTO dto) {
+		try {	
+		Category entity = repository.getOne(id);
+		entity.setName(dto.getName());
+		entity = repository.save(entity);
+		return new CategoryDTO(entity);
+		}
+		catch(EntityNotFoundException e) {
+			throw new ResourceNotFoundException("Id not found " + id);
+		}
 	}
 }
