@@ -6,11 +6,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.study.spring.dto.CategoryDTO;
 import com.study.spring.entities.Category;
 import com.study.spring.repositories.CategoryRepository;
+import com.study.spring.services.exceptions.EntityNotFoundException;
 
 @Service
 public class CategoryService {
@@ -22,5 +24,12 @@ public class CategoryService {
 	public List<CategoryDTO> findAll() {
 		List<Category> list = repository.findAll();
 		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());		
+	}
+	
+	@Transactional(readOnly = true)
+	public Object findById(Long id) {
+		Optional<Category> obj = repository.findById(id);
+		Category entity = obj.orElseThrow(()-> new EntityNotFoundException("Entity Not Found"));
+		return new CategoryDTO(entity);
 	}
 }
